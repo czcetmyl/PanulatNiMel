@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>Panulat ni Mel</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=IM+Fell+English:ital@0;1&family=Lato:wght@300;400&display=swap" rel="stylesheet"/>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+--bg:#f5f0e8;--paper:#fdf8f0;--ink:#2c1810;--ink2:#5c3d2e;--accent:#8b4513;--gold:#c9a84c;--fade:#e8dcc8;--border:#c4a882;
+--font-main:'Cormorant Garamond',serif;--font-alt:'IM Fell English',serif;--font-ui:'Lato',sans-serif;
+}
+body{background:var(--bg);color:var(--ink);font-family:var(--font-main);min-height:100vh;overflow-x:hidden}
+
+/* SPLASH */
+#splash{position:fixed;inset:0;background:#0d0905;display:flex;flex-direction:column;align-items:center;justify-content:center;z-index:9999;transition:opacity 1.5s ease}
+#splash.fade-out{opacity:0;pointer-events:none}
+.splash-title{font-family:var(--font-alt);font-size:clamp(1.8rem,5vw,3.2rem);color:#e8d5b0;letter-spacing:.12em;text-align:center;animation:fadeUp 2s ease forwards;opacity:0}
+.splash-sub{font-family:var(--font-main);font-size:clamp(.9rem,2vw,1.2rem);color:#9d8060;margin-top:1rem;letter-spacing:.2em;text-align:center;animation:fadeUp 2s ease .6s forwards;opacity:0}
+.splash-line{width:60px;height:1px;background:#c9a84c;margin:1.5rem auto;animation:fadeUp 2s ease 1s forwards;opacity:0}
+.splash-enter{font-family:var(--font-ui);font-size:.8rem;color:#9d8060;letter-spacing:.3em;text-transform:uppercase;margin-top:2rem;animation:fadeUp 2s ease 1.5s forwards;opacity:0;cursor:pointer;border:1px solid #4a3020;background:transparent;padding:.6rem 1.4rem;transition:all .3s}
+.splash-enter:hover{border-color:#c9a84c;color:#c9a84c}
+@keyframes fadeUp{from{opacity:0;transform:translateY(16px)}to{opacity:1;transform:translateY(0)}}
+
+/* LOGIN MODAL */
+#login-modal{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:8000;display:none;align-items:center;justify-content:center}
+#login-modal.show{display:flex}
+.login-box{background:var(--paper);border:1px solid var(--border);padding:2.5rem 2rem;width:320px;text-align:center;animation:fadeUp .4s ease}
+.login-box h2{font-family:var(--font-alt);font-size:1.4rem;color:var(--ink);margin-bottom:.4rem}
+.login-box p{font-family:var(--font-main);font-size:.85rem;color:var(--ink2);font-style:italic;margin-bottom:1.5rem}
+.login-box input{width:100%;font-family:var(--font-main);font-size:.95rem;padding:.55rem .9rem;border:1px solid var(--border);background:var(--bg);color:var(--ink);outline:none;margin-bottom:.8rem;transition:border .2s}
+.login-box input:focus{border-color:var(--accent)}
+.login-btn{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.2em;text-transform:uppercase;padding:.55rem 1.4rem;background:var(--accent);color:#fff;border:none;cursor:pointer;width:100%;transition:background .2s}
+.login-btn:hover{background:#6b3410}
+.login-err{font-family:var(--font-main);font-size:.8rem;color:#a82020;font-style:italic;margin-top:.6rem;min-height:1rem}
+.login-cancel{font-family:var(--font-ui);font-size:.68rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);background:none;border:none;cursor:pointer;margin-top:.8rem;display:block;width:100%}
+
+/* MAIN */
+#main{display:none;min-height:100vh}
+
+/* HEADER */
+header{background:var(--paper);border-bottom:1px solid var(--border);padding:1.2rem 2rem;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;box-shadow:0 2px 12px rgba(44,24,16,.08);flex-wrap:wrap;gap:.5rem}
+.site-title{font-family:var(--font-alt);font-size:1.5rem;color:var(--accent);letter-spacing:.06em}
+.site-title span{font-size:.85rem;color:var(--ink2);font-family:var(--font-main);display:block;letter-spacing:.15em;margin-top:.1rem}
+nav{display:flex;gap:.5rem;align-items:center;flex-wrap:wrap}
+nav button{font-family:var(--font-ui);font-size:.72rem;letter-spacing:.15em;text-transform:uppercase;background:none;border:none;color:var(--ink2);cursor:pointer;padding:.4rem .7rem;border-bottom:1px solid transparent;transition:all .2s}
+nav button:hover,nav button.active{color:var(--accent);border-bottom-color:var(--gold)}
+.admin-badge{font-family:var(--font-ui);font-size:.62rem;letter-spacing:.1em;background:var(--accent);color:#fff;padding:.15rem .5rem;border-radius:1px;margin-left:.3rem}
+#audio-btn-header{font-size:.7rem;padding:.35rem .7rem;border:1px solid var(--border);border-radius:2px;color:var(--ink2);background:none;cursor:pointer;transition:all .2s;font-family:var(--font-ui);letter-spacing:.1em}
+
+/* THEME BAR */
+#theme-bar{background:var(--paper);border-bottom:1px solid var(--border);padding:.5rem 1.5rem;display:flex;align-items:center;gap:.6rem;overflow-x:auto;scrollbar-width:none}
+#theme-bar::-webkit-scrollbar{display:none}
+.theme-label{font-family:var(--font-ui);font-size:.65rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);white-space:nowrap}
+.theme-btn{font-family:var(--font-ui);font-size:.65rem;padding:.28rem .65rem;border:1px solid var(--border);background:none;color:var(--ink2);cursor:pointer;white-space:nowrap;transition:all .2s}
+.theme-btn:hover,.theme-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+
+/* PAGES */
+.page{display:none;padding:2rem;max-width:920px;margin:0 auto;animation:pageIn .5s ease}
+.page.active{display:block}
+@keyframes pageIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:translateY(0)}}
+
+/* HOME */
+.home-hero{text-align:center;padding:3.5rem 1rem 2.5rem;border-bottom:1px solid var(--border);margin-bottom:2.5rem}
+.home-hero h1{font-family:var(--font-alt);font-size:clamp(1.8rem,5vw,3.2rem);color:var(--ink);line-height:1.2;margin-bottom:.8rem}
+.home-hero p{font-family:var(--font-main);font-size:1.1rem;color:var(--ink2);font-style:italic;max-width:500px;margin:0 auto 1.2rem;line-height:1.8}
+.home-quote{font-family:var(--font-alt);font-size:.9rem;color:var(--accent);letter-spacing:.08em;border-top:1px solid var(--gold);border-bottom:1px solid var(--gold);padding:.7rem 1.5rem;display:inline-block;margin-top:.8rem}
+.genre-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:1rem;margin-bottom:2.5rem}
+.genre-card{background:var(--paper);border:1px solid var(--border);padding:1.2rem .8rem;text-align:center;cursor:pointer;transition:all .3s;position:relative;overflow:hidden}
+.genre-card::before{content:'';position:absolute;inset:0;background:var(--accent);opacity:0;transition:opacity .3s}
+.genre-card:hover::before{opacity:.06}
+.genre-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 24px rgba(44,24,16,.12)}
+.genre-card .icon{font-size:1.5rem;margin-bottom:.4rem;position:relative}
+.genre-card h3{font-family:var(--font-alt);font-size:.9rem;color:var(--ink);margin-bottom:.25rem;position:relative}
+.genre-card p{font-family:var(--font-ui);font-size:.65rem;color:var(--ink2);letter-spacing:.05em;position:relative}
+
+/* LIBRARY */
+.lib-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.2rem;flex-wrap:wrap;gap:.5rem}
+.lib-top h2{font-family:var(--font-alt);font-size:1.5rem;color:var(--ink)}
+.filter-row{display:flex;gap:.4rem;flex-wrap:wrap;margin-bottom:1.5rem}
+.filter-btn{font-family:var(--font-ui);font-size:.65rem;letter-spacing:.1em;text-transform:uppercase;padding:.28rem .7rem;border:1px solid var(--border);background:none;color:var(--ink2);cursor:pointer;transition:all .2s}
+.filter-btn:hover,.filter-btn.active{background:var(--accent);color:#fff;border-color:var(--accent)}
+.lit-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:1.2rem}
+.lit-card{background:var(--paper);border:1px solid var(--border);cursor:pointer;transition:all .3s;overflow:hidden;animation:cardIn .4s ease both}
+@keyframes cardIn{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.lit-card:hover{border-color:var(--accent);transform:translateY(-4px);box-shadow:0 8px 24px rgba(44,24,16,.14)}
+.lit-card-img{width:100%;height:130px;overflow:hidden;background:var(--fade);display:flex;align-items:center;justify-content:center;font-size:2rem;color:var(--border);position:relative}
+.lit-card-img img{width:100%;height:100%;object-fit:cover;transition:transform .4s ease}
+.lit-card:hover .lit-card-img img{transform:scale(1.06)}
+.lit-card-body{padding:.75rem}
+.lit-card-body h3{font-family:var(--font-alt);font-size:.95rem;color:var(--ink);margin-bottom:.25rem;line-height:1.3}
+.lit-card-body .meta{font-family:var(--font-ui);font-size:.62rem;letter-spacing:.1em;text-transform:uppercase;color:var(--ink2);margin-bottom:.3rem}
+.lit-card-body p{font-family:var(--font-main);font-size:.82rem;color:var(--ink2);font-style:italic;line-height:1.5;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.genre-tag{display:inline-block;font-family:var(--font-ui);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:.12rem .5rem;border:1px solid var(--border);color:var(--ink2);margin-top:.35rem}
+.admin-actions{display:flex;gap:.4rem;margin-top:.5rem}
+.del-btn{font-family:var(--font-ui);font-size:.58rem;letter-spacing:.1em;text-transform:uppercase;padding:.18rem .5rem;border:1px solid #a82020;color:#a82020;background:none;cursor:pointer;transition:all .2s}
+.del-btn:hover{background:#a82020;color:#fff}
+
+/* READER */
+#page-reader{position:relative}
+.reader-wrap{max-width:660px;margin:0 auto;padding:2rem 1rem}
+.reader-back{font-family:var(--font-ui);font-size:.68rem;letter-spacing:.15em;text-transform:uppercase;background:none;border:none;color:var(--accent);cursor:pointer;margin-bottom:1.5rem;display:flex;align-items:center;gap:.4rem;transition:gap .2s}
+.reader-back:hover{gap:.7rem}
+.reader-cover-wrap{position:relative;overflow:hidden;margin-bottom:2rem;border:1px solid var(--border)}
+.reader-cover-wrap img{width:100%;max-height:300px;object-fit:cover;display:block}
+.reader-meta{font-family:var(--font-ui);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;color:var(--ink2);margin-bottom:.4rem}
+.reader-title{font-family:var(--font-alt);font-size:clamp(1.5rem,4vw,2.4rem);color:var(--ink);margin-bottom:.4rem;line-height:1.2;animation:fadeUp .6s ease}
+.reader-tag{display:inline-block;font-family:var(--font-ui);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;padding:.18rem .7rem;border:1px solid var(--accent);color:var(--accent);margin-bottom:1.5rem}
+.reader-divider{border:none;border-top:1px solid var(--gold);margin:1.2rem 0}
+.reader-body{font-family:var(--font-main);font-size:1.1rem;color:var(--ink);line-height:2.1;white-space:pre-wrap;animation:fadeUp .8s ease .2s both}
+.reader-body.prose{font-size:1rem;line-height:1.9;text-align:justify}
+
+/* PIECE THEMES — applied to reader wrap */
+.pt-candlelight{--bg:#1a0f04;--paper:#231508;--ink:#f5ddb0;--ink2:#b89060;--accent:#d4a030;--gold:#e8b840;--border:#5c4020}
+.pt-moonlit{--bg:#080c18;--paper:#0c1020;--ink:#d0d8f0;--ink2:#8090b8;--accent:#6070c0;--gold:#8090d8;--border:#202840}
+.pt-rainglass{--bg:#e8ecf0;--paper:#f4f8fc;--ink:#1a2430;--ink2:#445060;--accent:#3a6080;--gold:#70a0b8;--border:#a0b8c8}
+.pt-rosedusk{--bg:#faeae4;--paper:#fff5f0;--ink:#280c08;--ink2:#683828;--accent:#c05838;--gold:#e08060;--border:#d8a898}
+.pt-sacredsmoke{--bg:#120c1e;--paper:#1a1028;--ink:#e0d0f0;--ink2:#9880c0;--accent:#a060d0;--gold:#c080e0;--border:#382858}
+.pt-foresthymn{--bg:#0c1c0c;--paper:#101e10;--ink:#c8e0c0;--ink2:#80b070;--accent:#50a040;--gold:#78c050;--border:#204020}
+.pt-ivoryink{--bg:#f8f8f0;--paper:#ffffff;--ink:#181818;--ink2:#505050;--accent:#303030;--gold:#909090;--border:#d0d0c8}
+.pt-embernights{--bg:#100804;--paper:#1a0e06;--ink:#f0d0a0;--ink2:#c09060;--accent:#e06820;--gold:#e8a030;--border:#503010}
+.pt-glacial{--bg:#e4eef8;--paper:#f0f6fc;--ink:#081828;--ink2:#285070;--accent:#306890;--gold:#60a0c8;--border:#90b8d8}
+.pt-lavender{--bg:#ede8f5;--paper:#f8f4fd;--ink:#180c28;--ink2:#4a3870;--accent:#7050a8;--gold:#a888d8;--border:#c0a8e8}
+.pt-twilight{--bg:#14101e;--paper:#1c1428;--ink:#d8c8e8;--ink2:#9880b0;--accent:#9060c0;--gold:#b080d8;--border:#402860}
+.pt-warmsepia{--bg:#f5ece0;--paper:#fdf6ec;--ink:#201408;--ink2:#604830;--accent:#a06020;--gold:#d09040;--border:#d0b060}
+.pt-midnightgarden{--bg:#0a1612;--paper:#101e18;--ink:#c8e0d8;--ink2:#70a898;--accent:#3aa880;--gold:#60d0a0;--border:#204838}
+.pt-crimson{--bg:#1a0404;--paper:#220808;--ink:#f0d0c8;--ink2:#b08080;--accent:#d03030;--gold:#e06060;--border:#500808}
+.pt-dustviolet{--bg:#14101e;--paper:#1c1428;--ink:#e0d8f0;--ink2:#a898c8;--accent:#9070c0;--gold:#b898e0;--border:#382860}
+.pt-goldenscroll{--bg:#faf0d0;--paper:#fffde8;--ink:#201400;--ink2:#685020;--accent:#b07810;--gold:#d8a820;--border:#d8c058}
+.pt-ashpearl{--bg:#f0eeec;--paper:#fafaf8;--ink:#181818;--ink2:#585858;--accent:#787878;--gold:#a0a090;--border:#d0d0c8}
+.pt-deepblue{--bg:#040c18;--paper:#081020;--ink:#c8d8f0;--ink2:#6888b8;--accent:#3068a8;--gold:#5090d0;--border:#102840}
+.pt-raven{--bg:#080808;--paper:#101010;--ink:#e0d8c8;--ink2:#a09888;--accent:#c0b090;--gold:#d8c878;--border:#302820}
+.pt-sakura{--bg:#fdf0f4;--paper:#fff8fa;--ink:#200c14;--ink2:#684050;--accent:#c05878;--gold:#e080a0;--border:#e0b0c0}
+
+/* piece theme preview swatches */
+.pt-swatch{width:28px;height:28px;border-radius:50%;border:2px solid transparent;cursor:pointer;transition:transform .2s,border-color .2s;flex-shrink:0}
+.pt-swatch:hover{transform:scale(1.2)}
+.pt-swatch.active{border-color:var(--accent);transform:scale(1.15)}
+
+/* WHISPERS */
+.whisper-section{margin-top:3rem;padding-top:2rem;border-top:1px solid var(--border)}
+.whisper-section h3{font-family:var(--font-alt);font-size:1.2rem;color:var(--ink);margin-bottom:.3rem}
+.whisper-prompt{font-family:var(--font-main);font-size:.88rem;color:var(--ink2);font-style:italic;margin-bottom:1.2rem;line-height:1.7;border-left:2px solid var(--gold);padding-left:.8rem}
+.whisper-form{display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.5rem}
+.whisper-form input,.whisper-form textarea{font-family:var(--font-main);font-size:.92rem;padding:.55rem .9rem;border:1px solid var(--border);background:var(--paper);color:var(--ink);resize:none;outline:none;transition:border .2s}
+.whisper-form input:focus,.whisper-form textarea:focus{border-color:var(--accent)}
+.whisper-form textarea{min-height:75px}
+.whisper-submit{font-family:var(--font-ui);font-size:.68rem;letter-spacing:.2em;text-transform:uppercase;padding:.5rem 1.2rem;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background .2s,transform .1s;align-self:flex-end}
+.whisper-submit:hover{background:#6b3410}
+.whisper-submit:active{transform:scale(.97)}
+.whisper-list{display:flex;flex-direction:column;gap:.8rem}
+.whisper-item{background:var(--paper);border-left:2px solid var(--gold);padding:.65rem 1rem;animation:fadeUp .3s ease}
+.whisper-item .wname{font-family:var(--font-ui);font-size:.65rem;letter-spacing:.12em;text-transform:uppercase;color:var(--accent);margin-bottom:.25rem}
+.whisper-item .wmsg{font-family:var(--font-main);font-size:.92rem;color:var(--ink2);font-style:italic;line-height:1.6}
+
+/* ADD PAGE */
+.add-form{background:var(--paper);border:1px solid var(--border);padding:2rem;max-width:660px;margin:0 auto}
+.add-form h2{font-family:var(--font-alt);font-size:1.5rem;color:var(--ink);margin-bottom:1.4rem}
+.form-group{margin-bottom:1.1rem}
+.form-group label{font-family:var(--font-ui);font-size:.67rem;letter-spacing:.18em;text-transform:uppercase;color:var(--ink2);display:block;margin-bottom:.35rem}
+.form-group input,.form-group textarea,.form-group select{width:100%;font-family:var(--font-main);font-size:.92rem;padding:.55rem .9rem;border:1px solid var(--border);background:var(--bg);color:var(--ink);outline:none;transition:border .2s}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{border-color:var(--accent)}
+.form-group textarea{min-height:180px;resize:vertical}
+.pt-picker{display:flex;flex-wrap:wrap;gap:.5rem;margin-top:.4rem}
+.img-preview-thumb{width:100%;max-height:160px;object-fit:cover;margin-top:.5rem;border:1px solid var(--border);display:none}
+.add-btn{font-family:var(--font-ui);font-size:.7rem;letter-spacing:.2em;text-transform:uppercase;padding:.55rem 1.6rem;background:var(--accent);color:#fff;border:none;cursor:pointer;transition:background .2s,transform .1s}
+.add-btn:hover{background:#6b3410}
+.add-btn:active{transform:scale(.97)}
+
+/* ABOUT */
+.about-wrap{max-width:560px;margin:0 auto;padding:3rem 1rem;text-align:center}
+.about-wrap h2{font-family:var(--font-alt);font-size:1.9rem;color:var(--ink);margin-bottom:.8rem}
+.about-wrap p{font-family:var(--font-main);font-size:1rem;color:var(--ink2);line-height:1.9;font-style:italic;margin-bottom:.8rem}
+.about-divider{border:none;border-top:1px solid var(--gold);margin:1.2rem auto;width:60px}
+
+/* EMPTY */
+.empty-state{text-align:center;padding:3.5rem 2rem;color:var(--ink2);font-family:var(--font-main);font-style:italic;font-size:1rem;grid-column:1/-1}
+
+/* AUDIO FLOAT */
+#audio-float{position:fixed;bottom:1.2rem;right:1.2rem;background:var(--paper);border:1px solid var(--border);padding:.45rem .85rem;display:none;align-items:center;gap:.5rem;font-family:var(--font-ui);font-size:.65rem;letter-spacing:.08em;color:var(--ink2);z-index:200;box-shadow:0 2px 12px rgba(0,0,0,.1)}
+#audio-float button{background:none;border:none;cursor:pointer;color:var(--accent);font-size:.95rem;line-height:1}
+
+/* SCROLL TOP */
+#scroll-top{position:fixed;bottom:1.2rem;left:1.2rem;background:var(--paper);border:1px solid var(--border);width:34px;height:34px;display:none;align-items:center;justify-content:center;cursor:pointer;font-size:.8rem;color:var(--accent);z-index:200;transition:all .2s}
+#scroll-top:hover{background:var(--accent);color:#fff}
+</style>
+</head>
+<body>
+
+<!-- SPLASH -->
+<div id="splash">
+  <div class="splash-title">Panulat ni Mel</div>
+  <div class="splash-line"></div>
+  <div class="splash-sub">A Collection of Words from the Heart</div>
+  <button class="splash-enter" onclick="enterSite()">Open the Pages ✦</button>
+</div>
+
+<!-- LOGIN MODAL -->
+<div id="login-modal">
+  <div class="login-box">
+    <h2>Author's Gate</h2>
+    <p>Enter your passphrase to access the writing desk.</p>
+    <input type="password" id="pw-input" placeholder="Passphrase..." onkeydown="if(event.key==='Enter')doLogin()"/>
+    <button class="login-btn" onclick="doLogin()">Enter</button>
+    <div class="login-err" id="login-err"></div>
+    <button class="login-cancel" onclick="closeLogin()">Cancel</button>
+  </div>
+</div>
+
+<!-- AUDIO -->
+<div id="audio-float">
+  <span>♪ ambient</span>
+  <button id="audio-btn" onclick="toggleAudio()" title="Toggle sound">⏸</button>
+</div>
+
+<div id="scroll-top" onclick="window.scrollTo({top:0,behavior:'smooth'})">↑</div>
+
+<!-- MAIN -->
+<div id="main">
+  <header>
+    <div class="site-title">Panulat ni Mel<span>A Literary Collection</span></div>
+    <nav>
+      <button class="active" onclick="showPage('home',this)">Home</button>
+      <button onclick="showPage('library',this)">Library</button>
+      <button id="admin-nav-btn" onclick="handleAdminNav(this)" style="display:none">+ Add Work <span class="admin-badge">Mel</span></button>
+      <button onclick="showPage('about',this)">About</button>
+      <button id="login-nav-btn" onclick="openLogin()" style="font-size:.62rem;color:var(--ink2);opacity:.5">✦</button>
+      <button id="logout-btn" onclick="doLogout()" style="display:none;font-size:.62rem;color:var(--ink2)">Sign out</button>
+      <button id="audio-btn-header" onclick="toggleAudio()">♪ on</button>
+    </nav>
+  </header>
+
+  <div id="theme-bar"><span class="theme-label">Theme:</span></div>
+
+  <!-- HOME -->
+  <div class="page active" id="page-home">
+    <div class="home-hero">
+      <h1>Maligayang pagdating<br/>sa Panulat ni Mel</h1>
+      <p>A quiet sanctuary of words — in Tagalog and English — born not from perfection, but from the depths of living, feeling, and seeking God.</p>
+      <div class="home-quote">Not every word is polished. Every word is true.</div>
+    </div>
+    <div style="text-align:center;margin-bottom:1.2rem"><h2 style="font-family:var(--font-alt);font-size:1.1rem;color:var(--ink2);letter-spacing:.1em">Browse by Genre</h2></div>
+    <div class="genre-grid">
+      <div class="genre-card" onclick="filterGenre('Godly')"><div class="icon">✦</div><h3>Godly</h3><p>Faith &amp; devotion</p></div>
+      <div class="genre-card" onclick="filterGenre('Lament')"><div class="icon">☁</div><h3>Lament</h3><p>Grief &amp; longing</p></div>
+      <div class="genre-card" onclick="filterGenre('Wholesome Dark')"><div class="icon">◐</div><h3>Wholesome Dark</h3><p>Light within shadows</p></div>
+      <div class="genre-card" onclick="filterGenre('Slice of Life')"><div class="icon">◇</div><h3>Slice of Life</h3><p>Everyday moments</p></div>
+      <div class="genre-card" onclick="filterGenre('Nostalgic')"><div class="icon">⧖</div><h3>Nostalgic</h3><p>Memory &amp; longing</p></div>
+    </div>
+  </div>
+
+  <!-- LIBRARY -->
+  <div class="page" id="page-library">
+    <div class="lib-top"><h2 id="lib-title">All Works</h2></div>
+    <div class="filter-row">
+      <button class="filter-btn active" onclick="setFilter('all',this)">All</button>
+      <button class="filter-btn" onclick="setFilter('Poetry',this)">Poetry</button>
+      <button class="filter-btn" onclick="setFilter('Prose',this)">Prose</button>
+      <button class="filter-btn" onclick="setFilter('Godly',this)">Godly</button>
+      <button class="filter-btn" onclick="setFilter('Lament',this)">Lament</button>
+      <button class="filter-btn" onclick="setFilter('Wholesome Dark',this)">Wholesome Dark</button>
+      <button class="filter-btn" onclick="setFilter('Slice of Life',this)">Slice of Life</button>
+      <button class="filter-btn" onclick="setFilter('Nostalgic',this)">Nostalgic</button>
+      <button class="filter-btn" onclick="setFilter('Tagalog',this)">Tagalog</button>
+      <button class="filter-btn" onclick="setFilter('English',this)">English</button>
+    </div>
+    <div class="lit-grid" id="lit-grid"></div>
+  </div>
+
+  <!-- READER -->
+  <div class="page" id="page-reader">
+    <div class="reader-wrap" id="reader-wrap">
+      <button class="reader-back" onclick="backToLibrary()">← Back to Library</button>
+      <div id="reader-img-wrap"></div>
+      <div class="reader-meta" id="reader-meta"></div>
+      <div class="reader-title" id="reader-title"></div>
+      <div class="reader-tag" id="reader-tag"></div>
+      <hr class="reader-divider"/>
+      <div class="reader-body" id="reader-body"></div>
+      <div class="whisper-section">
+        <h3>Leave a Whisper</h3>
+        <p class="whisper-prompt">"Your words do not need to be perfect — they only need to be true. Leave a whisper of what you felt."</p>
+        <div class="whisper-form">
+          <input type="text" id="w-name" placeholder="Your name (or remain nameless)"/>
+          <textarea id="w-msg" placeholder="What did this stir in you?"></textarea>
+          <button class="whisper-submit" onclick="submitWhisper()">Send Whisper</button>
+        </div>
+        <div class="whisper-list" id="whisper-list"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ADD (admin only) -->
+  <div class="page" id="page-add">
+    <div class="add-form">
+      <h2>Add a New Work</h2>
+      <div class="form-group"><label>Title</label><input type="text" id="f-title" placeholder="Title of your piece"/></div>
+      <div class="form-group"><label>Type</label><select id="f-type"><option>Poetry</option><option>Prose</option></select></div>
+      <div class="form-group"><label>Language</label><select id="f-lang"><option>English</option><option>Tagalog</option></select></div>
+      <div class="form-group"><label>Genre</label><select id="f-genre"><option>Godly</option><option>Lament</option><option>Wholesome Dark</option><option>Slice of Life</option><option>Nostalgic</option></select></div>
+      <div class="form-group">
+        <label>Piece Theme (sets the reader atmosphere)</label>
+        <div class="pt-picker" id="pt-picker"></div>
+        <div id="pt-name" style="font-family:var(--font-ui);font-size:.65rem;letter-spacing:.1em;color:var(--accent);margin-top:.4rem"></div>
+      </div>
+      <div class="form-group"><label>Cover Image</label><input type="file" id="f-img" accept="image/*" onchange="previewImg(this)"/><img id="img-preview-thumb" class="img-preview-thumb"/></div>
+      <div class="form-group"><label>Your Text</label><textarea id="f-body" placeholder="Paste or write your piece here..."></textarea></div>
+      <div class="form-group"><label>Short Excerpt (for card preview)</label><input type="text" id="f-excerpt" placeholder="A line or two..."/></div>
+      <button class="add-btn" onclick="addWork()">Publish to Collection</button>
+      <div id="add-msg" style="margin-top:.7rem;font-family:var(--font-main);font-style:italic;color:var(--accent);font-size:.88rem"></div>
+    </div>
+  </div>
+
+  <!-- ABOUT -->
+  <div class="page" id="page-about">
+    <div class="about-wrap">
+      <h2>About This Collection</h2>
+      <hr class="about-divider"/>
+      <p>These pages hold the honest words of Mel — unpolished, unafraid, and real. Written in the quiet hours of faith and doubt, joy and grief, ordinary days and glimpses of eternity.</p>
+      <p>Poetry and prose in Tagalog and English. Not intended for perfection — but for expression. May you find something here that names what you have long felt.</p>
+      <hr class="about-divider"/>
+      <p style="font-size:.82rem;letter-spacing:.14em;color:var(--accent)">PANULAT NI MEL</p>
+    </div>
+  </div>
+
+</div>
+
+<script>
+// ── PASSWORD (change this to your own) ─────────────────
+const ADMIN_PASS = 'panulat2024';
+
+// ── PIECE THEMES ────────────────────────────────────────
+const pieceThemes = [
+  {id:'pt-candlelight',name:'Candlelight',bg:'#1a0f04',paper:'#231508',swatch:'#e8a030'},
+  {id:'pt-moonlit',name:'Moonlit',bg:'#080c18',paper:'#0c1020',swatch:'#6070c0'},
+  {id:'pt-rainglass',name:'Rain Glass',bg:'#e8ecf0',paper:'#f4f8fc',swatch:'#3a6080'},
+  {id:'pt-rosedusk',name:'Rose Dusk',bg:'#faeae4',paper:'#fff5f0',swatch:'#c05838'},
+  {id:'pt-sacredsmoke',name:'Sacred Smoke',bg:'#120c1e',paper:'#1a1028',swatch:'#a060d0'},
+  {id:'pt-foresthymn',name:'Forest Hymn',bg:'#0c1c0c',paper:'#101e10',swatch:'#50a040'},
+  {id:'pt-ivoryink',name:'Ivory Ink',bg:'#f8f8f0',paper:'#ffffff',swatch:'#303030'},
+  {id:'pt-embernights',name:'Ember Nights',bg:'#100804',paper:'#1a0e06',swatch:'#e06820'},
+  {id:'pt-glacial',name:'Glacial',bg:'#e4eef8',paper:'#f0f6fc',swatch:'#306890'},
+  {id:'pt-lavender',name:'Lavender',bg:'#ede8f5',paper:'#f8f4fd',swatch:'#7050a8'},
+  {id:'pt-twilight',name:'Twilight',bg:'#14101e',paper:'#1c1428',swatch:'#9060c0'},
+  {id:'pt-warmsepia',name:'Warm Sepia',bg:'#f5ece0',paper:'#fdf6ec',swatch:'#a06020'},
+  {id:'pt-midnightgarden',name:'Midnight Garden',bg:'#0a1612',paper:'#101e18',swatch:'#3aa880'},
+  {id:'pt-crimson',name:'Crimson',bg:'#1a0404',paper:'#220808',swatch:'#d03030'},
+  {id:'pt-dustviolet',name:'Dust Violet',bg:'#14101e',paper:'#1c1428',swatch:'#9070c0'},
+  {id:'pt-goldenscroll',name:'Golden Scroll',bg:'#faf0d0',paper:'#fffde8',swatch:'#b07810'},
+  {id:'pt-ashpearl',name:'Ash & Pearl',bg:'#f0eeec',paper:'#fafaf8',swatch:'#787878'},
+  {id:'pt-deepblue',name:'Deep Blue',bg:'#040c18',paper:'#081020',swatch:'#3068a8'},
+  {id:'pt-raven',name:'Raven',bg:'#080808',paper:'#101010',swatch:'#c0b090'},
+  {id:'pt-sakura',name:'Sakura',bg:'#fdf0f4',paper:'#fff8fa',swatch:'#c05878'},
+];
+
+// ── SITE THEMES ─────────────────────────────────────────
+const themes=[
+  {n:'Aged Parchment',bg:'#f5f0e8',paper:'#fdf8f0',ink:'#2c1810',ink2:'#5c3d2e',accent:'#8b4513',gold:'#c9a84c',border:'#c4a882'},
+  {n:'Candlelight',bg:'#faf3e0',paper:'#fffdf5',ink:'#2b1d0e',ink2:'#6b4c1e',accent:'#c47c1a',gold:'#daa520',border:'#d4b896'},
+  {n:'Rainy Chapel',bg:'#e8ecf0',paper:'#f4f6f8',ink:'#1e2a35',ink2:'#4a5a6b',accent:'#3a6186',gold:'#8a9bb0',border:'#b0bec8'},
+  {n:'Midnight Garden',bg:'#0f1a18',paper:'#162220',ink:'#d4e8e0',ink2:'#8ab0a0',accent:'#4aaa80',gold:'#6dcc9a',border:'#2e4a40'},
+  {n:'Faded Letters',bg:'#ede8df',paper:'#f7f3ec',ink:'#2d261e',ink2:'#6e6050',accent:'#7a6248',gold:'#b09870',border:'#c8b898'},
+  {n:'Rose Dusk',bg:'#f5ece8',paper:'#fdf8f6',ink:'#2c1818',ink2:'#6b3838',accent:'#a84848',gold:'#d4906a',border:'#d4a898'},
+  {n:'Ink & Ivory',bg:'#f0ede8',paper:'#fafaf8',ink:'#1a1a1a',ink2:'#4a4a4a',accent:'#2c2c2c',gold:'#888880',border:'#c8c8c0'},
+  {n:'Forest Hymn',bg:'#e8ede0',paper:'#f4f7ef',ink:'#1e2a1a',ink2:'#3a5030',accent:'#3d6b35',gold:'#7aaa50',border:'#a0c080'},
+  {n:'Dusty Violet',bg:'#ede8f2',paper:'#f8f4fc',ink:'#201828',ink2:'#4e3868',accent:'#7048a0',gold:'#a87ad0',border:'#c0a0d8'},
+  {n:'Golden Hour',bg:'#faf0d8',paper:'#fffcf0',ink:'#2a2010',ink2:'#6a5020',accent:'#c08020',gold:'#e8b030',border:'#d8c080'},
+  {n:'Silent Snow',bg:'#eef0f4',paper:'#f8f9fc',ink:'#1c2030',ink2:'#4a5068',accent:'#5060a0',gold:'#8090c8',border:'#b8c0d8'},
+  {n:'Ember Nights',bg:'#1a1008',paper:'#221a10',ink:'#f0d8b8',ink2:'#c09060',accent:'#e07030',gold:'#e0a040',border:'#604020'},
+  {n:'Sea Glass',bg:'#e0eeec',paper:'#f0faf8',ink:'#102828',ink2:'#305050',accent:'#208070',gold:'#50b0a0',border:'#90c8c0'},
+  {n:'Worn Leather',bg:'#e8dcc8',paper:'#f4ece0',ink:'#281808',ink2:'#584030',accent:'#804820',gold:'#b08040',border:'#c0a060'},
+  {n:'Moonlit',bg:'#f0f0f8',paper:'#f8f8ff',ink:'#101028',ink2:'#383870',accent:'#4848a0',gold:'#8080c8',border:'#c0c0e0'},
+  {n:'Harvest',bg:'#f5ede0',paper:'#fdf7ee',ink:'#281c08',ink2:'#685028',accent:'#b87820',gold:'#d8a040',border:'#d0b068'},
+  {n:'Ash & Pearl',bg:'#f0eeec',paper:'#fafaf8',ink:'#181818',ink2:'#585858',accent:'#787878',gold:'#a0a090',border:'#d0d0c8'},
+  {n:'Deep Burgundy',bg:'#f5e8ec',paper:'#fdf4f6',ink:'#280c14',ink2:'#682038',accent:'#982848',gold:'#c05878',border:'#d09098'},
+  {n:'Twilight',bg:'#18101e',paper:'#201428',ink:'#d8c8e8',ink2:'#9880b0',accent:'#9060c0',gold:'#b080d8',border:'#402860'},
+  {n:'Sage & Smoke',bg:'#e8ece4',paper:'#f4f6f0',ink:'#202820',ink2:'#486048',accent:'#507850',gold:'#88a868',border:'#a8c098'},
+  {n:'Honey Jar',bg:'#faf0d0',paper:'#fffce8',ink:'#281c00',ink2:'#6c5010',accent:'#c08010',gold:'#e0b020',border:'#d8c060'},
+  {n:'Crimson Pages',bg:'#f8e8e0',paper:'#fff4f0',ink:'#200808',ink2:'#602020',accent:'#980000',gold:'#c04040',border:'#d09080'},
+  {n:'Cedar',bg:'#ede4d8',paper:'#f8f2ea',ink:'#241408',ink2:'#604830',accent:'#805030',gold:'#b08048',border:'#c0a878'},
+  {n:'Storm',bg:'#e0e4ea',paper:'#f0f2f6',ink:'#101820',ink2:'#3a4858',accent:'#305080',gold:'#6888b0',border:'#a0b0c8'},
+  {n:'Soft Coral',bg:'#faeae4',paper:'#fff5f0',ink:'#280c08',ink2:'#683828',accent:'#c05838',gold:'#e08060',border:'#d8a898'},
+  {n:'Pine & Frost',bg:'#e4eee8',paper:'#f0f8f2',ink:'#0c2018',ink2:'#285040',accent:'#186040',gold:'#40a070',border:'#80c0a0'},
+  {n:'Washi',bg:'#f2ede4',paper:'#faf8f2',ink:'#201808',ink2:'#504030',accent:'#806040',gold:'#c0a060',border:'#d0b888'},
+  {n:'Indigo Dreams',bg:'#e4e8f8',paper:'#f2f4fc',ink:'#0c1030',ink2:'#282e68',accent:'#3040a0',gold:'#6070d0',border:'#a0a8e0'},
+  {n:'Terracotta',bg:'#f5ede4',paper:'#fdf5ee',ink:'#281408',ink2:'#684030',accent:'#a84818',gold:'#d08040',border:'#d0a878'},
+  {n:'Lavender Haze',bg:'#ede8f5',paper:'#f8f4fd',ink:'#180c28',ink2:'#483868',accent:'#7050a8',gold:'#a888d8',border:'#c8a8e8'},
+  {n:'Dark Liturgy',bg:'#100c08',paper:'#1c1610',ink:'#e8d8c0',ink2:'#a08860',accent:'#c8a040',gold:'#d8b850',border:'#503c20'},
+  {n:'Morning Pages',bg:'#f8f5ee',paper:'#fffdf8',ink:'#201808',ink2:'#5a4828',accent:'#906820',gold:'#c09840',border:'#d8c080'},
+  {n:'Eucalyptus',bg:'#e4ede8',paper:'#f2f8f4',ink:'#0c2018',ink2:'#305040',accent:'#407860',gold:'#70a880',border:'#98c8a8'},
+  {n:'Burnt Sienna',bg:'#f2e8e0',paper:'#faf4ee',ink:'#201008',ink2:'#604028',accent:'#986030',gold:'#c89050',border:'#d0b080'},
+  {n:'Blue Quill',bg:'#e4eef8',paper:'#f0f6fc',ink:'#081828',ink2:'#205070',accent:'#206898',gold:'#50a0c8',border:'#90c0de'},
+  {n:'Muslin',bg:'#f0ece4',paper:'#faf8f2',ink:'#201c14',ink2:'#60584a',accent:'#807060',gold:'#b0a888',border:'#d0c8b0'},
+  {n:'Obsidian',bg:'#080808',paper:'#101010',ink:'#e0e0e0',ink2:'#909090',accent:'#c0c0c0',gold:'#d0d0d0',border:'#303030'},
+  {n:'Peach Blossom',bg:'#faeee8',paper:'#fff8f4',ink:'#280c08',ink2:'#684038',accent:'#c06058',gold:'#e09080',border:'#d8b0a8'},
+  {n:'Olive Scroll',bg:'#eaecdc',paper:'#f4f6e8',ink:'#181e08',ink2:'#484e20',accent:'#686e20',gold:'#98a040',border:'#b8c070'},
+  {n:'Copper & Cream',bg:'#f8f0e4',paper:'#fffbf4',ink:'#201408',ink2:'#604830',accent:'#a86828',gold:'#d09048',border:'#d8b880'},
+  {n:'Halo',bg:'#f8f8f0',paper:'#fffff8',ink:'#181810',ink2:'#484840',accent:'#888820',gold:'#b0b030',border:'#d0d080'},
+  {n:'Vesper',bg:'#1c1018',paper:'#241820',ink:'#e8d0d8',ink2:'#b09098',accent:'#c07080',gold:'#d890a0',border:'#503040'},
+  {n:'Autumn Ink',bg:'#f5ece0',paper:'#fdf6ec',ink:'#201408',ink2:'#604830',accent:'#a06020',gold:'#d09040',border:'#d0b060'},
+  {n:'Glacial',bg:'#e8eef4',paper:'#f4f8fc',ink:'#0c1820',ink2:'#304858',accent:'#407090',gold:'#70a0c0',border:'#a8c8d8'},
+  {n:'Saffron Dusk',bg:'#faf0d8',paper:'#fffef0',ink:'#201408',ink2:'#605020',accent:'#b08010',gold:'#d8a820',border:'#d8c060'},
+  {n:'Raven',bg:'#0c0c0c',paper:'#141414',ink:'#d8d0c8',ink2:'#909088',accent:'#b0a890',gold:'#c8b878',border:'#383028'},
+  {n:'Chapel Stone',bg:'#eceae4',paper:'#f6f4f0',ink:'#181610',ink2:'#504e48',accent:'#706e60',gold:'#a0a088',border:'#cac8c0'},
+  {n:'Seabed',bg:'#d8e8ec',paper:'#e8f4f8',ink:'#081820',ink2:'#205060',accent:'#106880',gold:'#40a0b8',border:'#80c0d0'},
+  {n:'Amber Vespers',bg:'#f8eed8',paper:'#fffef0',ink:'#201008',ink2:'#604820',accent:'#c07810',gold:'#e0a020',border:'#d8b850'},
+  {n:'Sacred Smoke',bg:'#ece8f0',paper:'#f8f4fc',ink:'#180c20',ink2:'#483858',accent:'#705898',gold:'#9880c0',border:'#c0a8d8'},
+];
+
+// ── STATE ─────────────────────────────────────────────
+let works = JSON.parse(localStorage.getItem('mel_works')||'[]');
+let whispers = JSON.parse(localStorage.getItem('mel_whispers')||'{}');
+let isAdmin = false;
+let currentWork = null;
+let activeFilter = 'all';
+let selectedPieceTheme = '';
+let pendingImg = '';
+let currentTheme = parseInt(localStorage.getItem('mel_theme')||'0');
+
+// ── ADMIN ──────────────────────────────────────────────
+function openLogin(){document.getElementById('login-modal').classList.add('show');setTimeout(()=>document.getElementById('pw-input').focus(),100)}
+function closeLogin(){document.getElementById('login-modal').classList.remove('show');document.getElementById('pw-input').value='';document.getElementById('login-err').textContent=''}
+function doLogin(){
+  if(document.getElementById('pw-input').value===ADMIN_PASS){
+    isAdmin=true;closeLogin();
+    document.getElementById('admin-nav-btn').style.display='';
+    document.getElementById('login-nav-btn').style.display='none';
+    document.getElementById('logout-btn').style.display='';
+  } else {
+    document.getElementById('login-err').textContent='Incorrect passphrase.';
+    document.getElementById('pw-input').value='';
+  }
+}
+function doLogout(){
+  isAdmin=false;
+  document.getElementById('admin-nav-btn').style.display='none';
+  document.getElementById('logout-btn').style.display='none';
+  document.getElementById('login-nav-btn').style.display='';
+  if(document.getElementById('page-add').classList.contains('active'))showPage('home',document.querySelector('nav button'));
+  renderLibrary();
+}
+function handleAdminNav(btn){showPage('add',btn)}
+
+// ── SITE THEMES ────────────────────────────────────────
+function applyTheme(i){
+  currentTheme=i;
+  const t=themes[i],r=document.documentElement;
+  r.style.setProperty('--bg',t.bg);r.style.setProperty('--paper',t.paper);
+  r.style.setProperty('--ink',t.ink);r.style.setProperty('--ink2',t.ink2);
+  r.style.setProperty('--accent',t.accent);r.style.setProperty('--gold',t.gold);
+  r.style.setProperty('--border',t.border);r.style.setProperty('--fade',t.bg);
+  document.querySelectorAll('#theme-bar .theme-btn').forEach((b,j)=>b.classList.toggle('active',j===i));
+  localStorage.setItem('mel_theme',i);
+}
+function buildThemeBar(){
+  const bar=document.getElementById('theme-bar');
+  themes.forEach((t,i)=>{const b=document.createElement('button');b.className='theme-btn'+(i===currentTheme?' active':'');b.textContent=t.n;b.onclick=()=>applyTheme(i);bar.appendChild(b)});
+}
+
+// ── PIECE THEME PICKER ─────────────────────────────────
+function buildPiecePicker(){
+  const p=document.getElementById('pt-picker');
+  pieceThemes.forEach(pt=>{
+    const s=document.createElement('div');
+    s.className='pt-swatch'+(selectedPieceTheme===pt.id?' active':'');
+    s.style.background=pt.swatch;
+    s.title=pt.name;
+    s.onclick=()=>{
+      selectedPieceTheme=pt.id;
+      document.querySelectorAll('.pt-swatch').forEach(x=>x.classList.remove('active'));
+      s.classList.add('active');
+      document.getElementById('pt-name').textContent=pt.name;
+    };
+    p.appendChild(s);
+  });
+  // "none" option
+  const none=document.createElement('div');
+  none.className='pt-swatch active';
+  none.style.background='linear-gradient(135deg,#ccc 50%,#fff 50%)';
+  none.title='Default (site theme)';
+  none.onclick=()=>{selectedPieceTheme='';document.querySelectorAll('.pt-swatch').forEach(x=>x.classList.remove('active'));none.classList.add('active');document.getElementById('pt-name').textContent='Default (site theme)'};
+  p.prepend(none);
+}
+
+// ── AMBIENT AUDIO ──────────────────────────────────────
+let audioCtx=null,gainNode=null,audioPlaying=true;
+function startAmbient(){
+  try{
+    audioCtx=new(window.AudioContext||window.webkitAudioContext)();
+    gainNode=audioCtx.createGain();gainNode.gain.value=0.035;gainNode.connect(audioCtx.destination);
+    playDrone();
+  }catch(e){}
+}
+function playDrone(){
+  if(!audioCtx||!audioPlaying)return;
+  [110,165.5,220,277.2].forEach(f=>{
+    const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+    o.type='sine';o.frequency.value=f;
+    g.gain.setValueAtTime(0,audioCtx.currentTime);
+    g.gain.linearRampToValueAtTime(.25,audioCtx.currentTime+8);
+    g.gain.linearRampToValueAtTime(0,audioCtx.currentTime+22);
+    o.connect(g);g.connect(gainNode);o.start();o.stop(audioCtx.currentTime+22);
+  });
+  setTimeout(()=>{if(audioPlaying)playDrone();},20000);
+}
+function toggleAudio(){
+  audioPlaying=!audioPlaying;
+  if(gainNode)gainNode.gain.value=audioPlaying?.035:0;
+  const label=audioPlaying?'♪ on':'♪ off';
+  document.getElementById('audio-btn').textContent=audioPlaying?'⏸':'▶';
+  document.getElementById('audio-btn-header').textContent=label;
+}
+
+// ── SPLASH ─────────────────────────────────────────────
+function enterSite(){
+  const s=document.getElementById('splash');s.classList.add('fade-out');
+  setTimeout(()=>{s.style.display='none';document.getElementById('main').style.display='block';startAmbient();document.getElementById('audio-float').style.display='flex';},1500);
+}
+
+// ── NAV ────────────────────────────────────────────────
+function showPage(name,btn){
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.querySelectorAll('nav button').forEach(b=>b.classList.remove('active'));
+  document.getElementById('page-'+name).classList.add('active');
+  if(btn)btn.classList.add('active');
+  if(name==='library')renderLibrary();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+
+// ── LIBRARY ────────────────────────────────────────────
+function setFilter(f,btn){
+  activeFilter=f;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.remove('active'));
+  if(btn)btn.classList.add('active');
+  renderLibrary();
+}
+function filterGenre(g){
+  showPage('library',document.querySelector('nav button:nth-child(2)'));
+  activeFilter=g;
+  document.querySelectorAll('.filter-btn').forEach(b=>b.classList.toggle('active',b.textContent===g));
+  renderLibrary();
+}
+function renderLibrary(){
+  const grid=document.getElementById('lit-grid');
+  let filtered=works;
+  if(activeFilter!=='all')filtered=works.filter(w=>w.genre===activeFilter||w.type===activeFilter||w.lang===activeFilter);
+  document.getElementById('lib-title').textContent=activeFilter==='all'?'All Works':activeFilter;
+  if(!filtered.length){grid.innerHTML='<div class="empty-state">No works yet in this collection.</div>';return;}
+  grid.innerHTML='';
+  filtered.forEach(w=>{
+    const realIdx=works.indexOf(w);
+    const card=document.createElement('div');
+    card.className='lit-card';
+    card.style.animationDelay=(filtered.indexOf(w)*.05)+'s';
+    const imgHtml=w.img?`<img src="${w.img}" alt=""/>`:`<div style="width:100%;height:130px;background:var(--fade);display:flex;align-items:center;justify-content:center;font-size:1.8rem;color:var(--border)">✦</div>`;
+    let adminHtml='';
+    if(isAdmin)adminHtml=`<div class="admin-actions"><button class="del-btn" onclick="event.stopPropagation();deleteWork(${realIdx})">Delete</button></div>`;
+    card.innerHTML=`<div class="lit-card-img">${imgHtml}</div><div class="lit-card-body"><div class="meta">${w.type} · ${w.lang}</div><h3>${w.title}</h3><p>${w.excerpt||''}</p><span class="genre-tag">${w.genre}</span>${adminHtml}</div>`;
+    card.onclick=()=>openWork(realIdx);
+    grid.appendChild(card);
+  });
+}
+function deleteWork(i){
+  if(!confirm('Delete this work?'))return;
+  works.splice(i,1);
+  delete whispers[i];
+  // re-index whispers
+  const newW={};Object.keys(whispers).forEach(k=>{const ki=parseInt(k);if(ki>i)newW[ki-1]=whispers[k];else if(ki<i)newW[ki]=whispers[k];});
+  whispers=newW;
+  localStorage.setItem('mel_works',JSON.stringify(works));
+  localStorage.setItem('mel_whispers',JSON.stringify(whispers));
+  renderLibrary();
+}
+
+// ── READER ─────────────────────────────────────────────
+function applyPieceTheme(ptId){
+  const wrap=document.getElementById('reader-wrap');
+  pieceThemes.forEach(pt=>wrap.classList.remove(pt.id));
+  if(ptId){
+    wrap.classList.add(ptId);
+    const pt=pieceThemes.find(p=>p.id===ptId);
+    if(pt){
+      wrap.style.background=pt.bg;
+      wrap.style.borderRadius='2px';
+      wrap.style.padding='2.5rem 2rem';
+      wrap.style.transition='background .6s ease';
+    }
+  } else {
+    wrap.style.background='';wrap.style.padding='2rem 1rem';
+  }
+}
+function openWork(i){
+  currentWork=i;const w=works[i];
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById('page-reader').classList.add('active');
+  document.getElementById('reader-meta').textContent=`${w.type} · ${w.lang}`;
+  document.getElementById('reader-title').textContent=w.title;
+  document.getElementById('reader-tag').textContent=w.genre;
+  const body=document.getElementById('reader-body');
+  body.textContent=w.body;body.className='reader-body'+(w.type==='Prose'?' prose':'');
+  const imgWrap=document.getElementById('reader-img-wrap');
+  imgWrap.innerHTML=w.img?`<div class="reader-cover-wrap"><img src="${w.img}" alt=""/></div>`:'';
+  applyPieceTheme(w.pieceTheme||'');
+  renderWhispers(i);
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function backToLibrary(){
+  document.getElementById('page-reader').classList.remove('active');
+  document.getElementById('page-library').classList.add('active');
+  document.getElementById('reader-wrap').style.background='';
+  document.getElementById('reader-wrap').style.padding='2rem 1rem';
+  const wrap=document.getElementById('reader-wrap');
+  pieceThemes.forEach(pt=>wrap.classList.remove(pt.id));
+  renderLibrary();
+}
+
+// ── WHISPERS ───────────────────────────────────────────
+function renderWhispers(i){
+  const list=document.getElementById('whisper-list');
+  const ws=whispers[i]||[];
+  list.innerHTML=ws.length?ws.map(w=>`<div class="whisper-item"><div class="wname">${w.name}</div><div class="wmsg">${w.msg}</div></div>`).join(''):'';
+}
+function submitWhisper(){
+  const name=document.getElementById('w-name').value.trim();
+  const msg=document.getElementById('w-msg').value.trim();
+  if(!msg)return;
+  if(!whispers[currentWork])whispers[currentWork]=[];
+  whispers[currentWork].push({name:name||'Anonymous',msg});
+  localStorage.setItem('mel_whispers',JSON.stringify(whispers));
+  document.getElementById('w-name').value='';document.getElementById('w-msg').value='';
+  renderWhispers(currentWork);
+}
+
+// ── ADD WORK ───────────────────────────────────────────
+function previewImg(input){
+  const f=input.files[0];if(!f)return;
+  const r=new FileReader();r.onload=e=>{pendingImg=e.target.result;const p=document.getElementById('img-preview-thumb');p.src=pendingImg;p.style.display='block';};r.readAsDataURL(f);
+}
+function addWork(){
+  const title=document.getElementById('f-title').value.trim();
+  const body=document.getElementById('f-body').value.trim();
+  if(!title||!body){document.getElementById('add-msg').textContent='Please fill in at least the title and text.';return;}
+  works.push({title,type:document.getElementById('f-type').value,lang:document.getElementById('f-lang').value,genre:document.getElementById('f-genre').value,pieceTheme:selectedPieceTheme,body,excerpt:document.getElementById('f-excerpt').value.trim(),img:pendingImg||'',date:new Date().toLocaleDateString('en-PH',{year:'numeric',month:'long',day:'numeric'})});
+  localStorage.setItem('mel_works',JSON.stringify(works));
+  pendingImg='';document.getElementById('img-preview-thumb').style.display='none';
+  ['f-title','f-body','f-excerpt'].forEach(id=>document.getElementById(id).value='');
+  document.getElementById('f-img').value='';selectedPieceTheme='';
+  document.querySelectorAll('.pt-swatch').forEach((s,i)=>s.classList.toggle('active',i===0));
+  document.getElementById('pt-name').textContent='';
+  document.getElementById('add-msg').textContent='✦ Published to your collection.';
+  setTimeout(()=>document.getElementById('add-msg').textContent='',3000);
+}
+
+// ── SCROLL TOP ─────────────────────────────────────────
+window.addEventListener('scroll',()=>{document.getElementById('scroll-top').style.display=window.scrollY>300?'flex':'none'});
+
+// ── INIT ───────────────────────────────────────────────
+applyTheme(currentTheme);
+buildThemeBar();
+buildPiecePicker();
+</script>
+</body>
+</html>
